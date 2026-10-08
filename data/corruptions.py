@@ -7,19 +7,21 @@ from collections.abc import Callable
 
 import numpy as np
 from PIL import Image, ImageEnhance, ImageFilter
+from prodml.config import params, settings
 
-from prodml.config import settings
 from prodml.schemas import ManifestRecord
 
 SEVERITIES: tuple[int, ...] = (1, 2, 3)
 RESAMPLE = Image.Resampling.BILINEAR
 
-BLUR_RADIUS = (1, 2, 4)
-BRIGHTNESS_UP = (1.3, 1.6, 2.0)
-BRIGHTNESS_DOWN = (0.7, 0.5, 0.3)
-JPEG_QUALITY = (60, 30, 10) 
-DOWNSCALE_SIDE = (160, 96, 64)  
-MOTION_LENGTH = (5, 9, 15)
+
+_P = params["corruptions"]
+BLUR_RADIUS = tuple(_P["blur_radius"])
+BRIGHTNESS_UP = tuple(_P["brightness_up"])
+BRIGHTNESS_DOWN = tuple(_P["brightness_down"])
+JPEG_QUALITY = tuple(_P["jpeg_quality"])
+DOWNSCALE_SIDE = tuple(_P["downscale_side"])
+MOTION_LENGTH = tuple(_P["motion_length"])
 
 
 def _level[T](params: tuple[T, ...], severity: int) -> T:
