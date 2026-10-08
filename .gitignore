@@ -1,4 +1,5 @@
 data/raw/oxford-iiit-pet
+data/manifest.json
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[codz]
