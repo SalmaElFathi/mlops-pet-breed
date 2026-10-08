@@ -9,6 +9,8 @@ class Settings(BaseSettings):
     random_state: int = 42
     label_map_path: Path = Path("data/label_map.json")
     manifest_path: Path = Path("data/manifest.json")
+    corrupted_root: Path = Path("data/corrupted")
+    corrupted_manifest_path: Path = Path("data/manifest_corrupted.json")
 
 
 settings = Settings()
