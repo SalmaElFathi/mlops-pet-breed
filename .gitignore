@@ -1,5 +1,4 @@
-data/oxford-iiit-pet
-data/corrupted
+data/raw/oxford-iiit-pet
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[codz]
