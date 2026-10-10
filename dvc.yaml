@@ -2,7 +2,10 @@ stages:
   build_manifest:
     cmd: python -m prodml.manifest
     deps:
-      - src/prodml
+      - src/prodml/manifest.py
+      - src/prodml/data.py
+      - src/prodml/schemas.py
+      - src/prodml/config.py
       - data/raw
     params:
       - split.seed
@@ -17,7 +20,8 @@ stages:
     cmd: python data/corruptions.py
     deps:
       - data/corruptions.py
-      - src/prodml
+      - src/prodml/schemas.py
+      - src/prodml/config.py
       - data/manifest.json
       - data/raw
     params:
