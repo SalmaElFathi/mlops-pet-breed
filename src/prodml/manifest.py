@@ -3,14 +3,16 @@ from pathlib import Path
 
 from sklearn.model_selection import train_test_split
 
+from prodml.config import settings
 from prodml.data import load_data
 from prodml.schemas import ManifestRecord
-from prodml.config import settings
+
+
 def build_records(split: str) -> list[ManifestRecord]:
     ds = load_data(settings.data_path, split, target_types=["category", "binary-category"])
     records: list[ManifestRecord] = []
     for i, path in enumerate(ds._images):
-        img, (label, is_dog) = ds[i]  
+        img, (label, is_dog) = ds[i]
         width, height = img.size
         records.append(
             ManifestRecord(
@@ -18,7 +20,7 @@ def build_records(split: str) -> list[ManifestRecord]:
                 path=Path(path).as_posix(),
                 breed=ds.classes[label],
                 species="dog" if is_dog else "cat",
-                class_index=label, 
+                class_index=label,
                 split="test" if split == "test" else "train",
                 width=width,
                 height=height,
@@ -35,6 +37,11 @@ def main() -> None:
     label_map = {breed: i for i, breed in enumerate(breeds)}
     settings.label_map_path.parent.mkdir(parents=True, exist_ok=True)
     settings.label_map_path.write_text(json.dumps(label_map, indent=2, ensure_ascii=False))
+
+    species = {r.breed: r.species for r in trainval + test}
+    settings.species_map_path.write_text(
+        json.dumps(dict(sorted(species.items())), indent=2, ensure_ascii=False)
+    )
 
     idx = list(range(len(trainval)))
     y = [r.breed for r in trainval]

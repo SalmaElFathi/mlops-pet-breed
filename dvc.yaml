@@ -11,7 +11,8 @@ stages:
       - data/manifest.json
       - data/label_map.json:
           cache: false
-
+      - data/species_map.json:
+          cache: false
   corruptions:
     cmd: python data/corruptions.py
     deps:
