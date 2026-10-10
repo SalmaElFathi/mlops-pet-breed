@@ -9,3 +9,15 @@ corruptions:
   jpeg_quality: [60, 30, 10]
   downscale_side: [160, 96, 64]
   motion_length: [5, 9, 15]
+
+calibration:
+  abstention_threshold: 0.7
+
+train:
+  backbone: resnet50
+  lr: 0.001
+  batch_size: 32
+  epochs: 5
+  seed: 42
+  image_size: 224
+  resize_size: 256
