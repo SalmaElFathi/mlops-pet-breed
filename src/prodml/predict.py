@@ -5,7 +5,7 @@ from PIL import Image
 
 from prodml.api.schemas import BreedScore, PetBreedResponse
 from prodml.model import PetClassifier
-
+from prodml.utils import timed
 
 class Predictor:
     """Holds the model (loaded once) and turns an image into a decision."""
@@ -26,6 +26,7 @@ class Predictor:
     def num_classes(self) -> int:
         return len(self.model.class_names)
 
+    @timed
     @torch.inference_mode()
     def predict(self, image: Image.Image) -> PetBreedResponse:
         x = self.model.preprocess(image).unsqueeze(0)
