@@ -10,9 +10,9 @@ stages:
       nfiles: 25866
     - path: src/prodml
       hash: md5
-      md5: ca12f59048f6459bee7ce602c9f81462.dir
-      size: 13595
-      nfiles: 17
+      md5: 9cff8b2208d7d09380350a80981ec90b.dir
+      size: 40860
+      nfiles: 27
     params:
       params.yaml:
         split.seed: 42
@@ -26,6 +26,10 @@ stages:
       hash: md5
       md5: f9c6319a51d1c809d2eb1dafb293270f
       size: 2094391
+    - path: data/species_map.json
+      hash: md5
+      md5: db2d2ff6d8846fab5c5c49c9173ba1ed
+      size: 915
   corruptions:
     cmd: python data/corruptions.py
     deps:
@@ -44,9 +48,9 @@ stages:
       nfiles: 25866
     - path: src/prodml
       hash: md5
-      md5: ca12f59048f6459bee7ce602c9f81462.dir
-      size: 13595
-      nfiles: 17
+      md5: 9cff8b2208d7d09380350a80981ec90b.dir
+      size: 40860
+      nfiles: 27
     params:
       params.yaml:
         corruptions:
