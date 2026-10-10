@@ -3,6 +3,7 @@ from __future__ import annotations
 import argparse
 import io
 import json
+import logging
 from collections.abc import Callable
 
 import numpy as np
@@ -10,6 +11,9 @@ from PIL import Image, ImageEnhance, ImageFilter
 from prodml.config import params, settings
 
 from prodml.schemas import ManifestRecord
+from prodml.logging_conf import setup_logging
+
+logger=logging.getLogger(__name__)
 
 SEVERITIES: tuple[int, ...] = (1, 2, 3)
 RESAMPLE = Image.Resampling.BILINEAR
@@ -97,6 +101,7 @@ def parse_args() -> argparse.Namespace:
 
 
 def main() -> None:
+    setup_logging()
     args = parse_args()
     manifest = json.loads(settings.manifest_path.read_text())
     test = [
@@ -128,7 +133,7 @@ def main() -> None:
                         }
                     )
                 )
-            print(f"{name} s{severity}: {len(test)} images")
+            logger.info("%s s%d: %d images",name,severity,len(test))
 
     settings.corrupted_manifest_path.write_text(
         json.dumps([r.model_dump() for r in records], indent=2, ensure_ascii=False)

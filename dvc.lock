@@ -18,8 +18,8 @@ stages:
       size: 392
     - path: src/prodml/manifest.py
       hash: md5
-      md5: c7970f94b179b8aa43571cce0246ee06
-      size: 2131
+      md5: d95dfcb9ec8fcfc470cbf434dc2daad1
+      size: 2270
     - path: src/prodml/schemas.py
       hash: md5
       md5: 78ed229264fc490c46c1f337c6c5afbe
@@ -46,8 +46,8 @@ stages:
     deps:
     - path: data/corruptions.py
       hash: md5
-      md5: 0b446a68a90b1035fd4eebbecd3c6573
-      size: 4828
+      md5: b179398cd28464d3e2878c2a347843d3
+      size: 4953
     - path: data/manifest.json
       hash: md5
       md5: f9c6319a51d1c809d2eb1dafb293270f

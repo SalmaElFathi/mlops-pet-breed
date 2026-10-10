@@ -1,13 +1,14 @@
 import json
 from pathlib import Path
-
+import logging
 from sklearn.model_selection import train_test_split
 
 from prodml.config import settings
 from prodml.data import load_data
 from prodml.schemas import ManifestRecord
+from prodml.logging_conf import setup_logging
 
-
+logger=logging.getLogger(__name__)
 def build_records(split: str) -> list[ManifestRecord]:
     ds = load_data(settings.data_path, split, target_types=["category", "binary-category"])
     records: list[ManifestRecord] = []
@@ -30,6 +31,7 @@ def build_records(split: str) -> list[ManifestRecord]:
 
 
 def main() -> None:
+    setup_logging()
     trainval = build_records("trainval")
     test = build_records("test")
 
@@ -60,8 +62,7 @@ def main() -> None:
     )
 
     counts = {s: sum(r.split == s for r in records) for s in ("train", "val", "test")}
-    print(counts)
-
+    logger.info("split counts: %s", counts)
 
 if __name__ == "__main__":
     main()
