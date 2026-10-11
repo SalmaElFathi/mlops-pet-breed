@@ -1,0 +1,17 @@
+exclude: ^data/(label_map|species_map|manifest|manifest_corrupted)\.json$
+
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v6.0.0
+    hooks:
+      - id: end-of-file-fixer
+      - id: trailing-whitespace
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.17.0
+    hooks:
+      - id: ruff-check
+        args: [--fix]
+  - repo: https://github.com/psf/black
+    rev: 26.10.1
+    hooks:
+      - id: black
