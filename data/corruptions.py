@@ -8,12 +8,12 @@ from collections.abc import Callable
 
 import numpy as np
 from PIL import Image, ImageEnhance, ImageFilter
+
 from prodml.config import params, settings
-
-from prodml.schemas import ManifestRecord
 from prodml.logging_conf import setup_logging
+from prodml.schemas import ManifestRecord
 
-logger=logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 SEVERITIES: tuple[int, ...] = (1, 2, 3)
 RESAMPLE = Image.Resampling.BILINEAR
@@ -91,12 +91,24 @@ def corrupt(image: Image.Image, name: str, severity: int) -> Image.Image:
 
 def parse_args() -> argparse.Namespace:
     p = argparse.ArgumentParser(description="Generate corrupted copies of the test set.")
-    p.add_argument("--corruption", nargs="+", choices=get_corruption_names(),
-                   default=get_corruption_names(), help="corruptions to apply (default: all)")
-    p.add_argument("--severity", nargs="+", type=int, choices=SEVERITIES,
-                   default=list(SEVERITIES), help="severity levels (default: all)")
-    p.add_argument("--limit", type=int, default=None,
-                   help="only process the first N test images (quick check)")
+    p.add_argument(
+        "--corruption",
+        nargs="+",
+        choices=get_corruption_names(),
+        default=get_corruption_names(),
+        help="corruptions to apply (default: all)",
+    )
+    p.add_argument(
+        "--severity",
+        nargs="+",
+        type=int,
+        choices=SEVERITIES,
+        default=list(SEVERITIES),
+        help="severity levels (default: all)",
+    )
+    p.add_argument(
+        "--limit", type=int, default=None, help="only process the first N test images (quick check)"
+    )
     return p.parse_args()
 
 
@@ -105,9 +117,7 @@ def main() -> None:
     args = parse_args()
     manifest = json.loads(settings.manifest_path.read_text())
     test = [
-        ManifestRecord(**r)
-        for r in manifest
-        if r["split"] == "test" and r["corruption"] is None
+        ManifestRecord(**r) for r in manifest if r["split"] == "test" and r["corruption"] is None
     ]
     if args.limit is not None:
         test = test[: args.limit]
@@ -133,7 +143,7 @@ def main() -> None:
                         }
                     )
                 )
-            logger.info("%s s%d: %d images",name,severity,len(test))
+            logger.info("%s s%d: %d images", name, severity, len(test))
 
     settings.corrupted_manifest_path.write_text(
         json.dumps([r.model_dump() for r in records], indent=2, ensure_ascii=False)

@@ -10,20 +10,20 @@ stages:
       nfiles: 25866
     - path: src/prodml/config.py
       hash: md5
-      md5: 7ce035dafa84de35a761d091d6913ae5
-      size: 876
+      md5: 2545345c32d672a902316eee496cbbfb
+      size: 877
     - path: src/prodml/data.py
       hash: md5
-      md5: 9a895c7912c73a28fa48efc333aa6954
-      size: 392
+      md5: ad6b5c21ec4a4be18bda1ae0155b020d
+      size: 393
     - path: src/prodml/manifest.py
       hash: md5
-      md5: d95dfcb9ec8fcfc470cbf434dc2daad1
-      size: 2270
+      md5: 272a245dd4a0b1a2436b34535a1e1622
+      size: 2277
     - path: src/prodml/schemas.py
       hash: md5
-      md5: 78ed229264fc490c46c1f337c6c5afbe
-      size: 408
+      md5: d6673496342440dcca7730f5b2ff40af
+      size: 412
     params:
       params.yaml:
         split.seed: 42
@@ -46,8 +46,8 @@ stages:
     deps:
     - path: data/corruptions.py
       hash: md5
-      md5: b179398cd28464d3e2878c2a347843d3
-      size: 4953
+      md5: 55c415748fec76b297151982553c8ef5
+      size: 5002
     - path: data/manifest.json
       hash: md5
       md5: f9c6319a51d1c809d2eb1dafb293270f
@@ -59,12 +59,12 @@ stages:
       nfiles: 25866
     - path: src/prodml/config.py
       hash: md5
-      md5: 7ce035dafa84de35a761d091d6913ae5
-      size: 876
+      md5: 2545345c32d672a902316eee496cbbfb
+      size: 877
     - path: src/prodml/schemas.py
       hash: md5
-      md5: 78ed229264fc490c46c1f337c6c5afbe
-      size: 408
+      md5: d6673496342440dcca7730f5b2ff40af
+      size: 412
     params:
       params.yaml:
         corruptions:

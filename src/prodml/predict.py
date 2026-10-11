@@ -7,6 +7,7 @@ from prodml.api.schemas import BreedScore, PetBreedResponse
 from prodml.model import PetClassifier
 from prodml.utils import timed
 
+
 class Predictor:
     """Holds the model (loaded once) and turns an image into a decision."""
 
