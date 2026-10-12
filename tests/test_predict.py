@@ -84,3 +84,25 @@ def test_a_preprocessing_mismatch_would_be_detected(
         skewed = T.Compose([T.Resize(256), T.CenterCrop(224), T.ToTensor()])(rgb).unsqueeze(0)
     with torch.inference_mode():
         assert not torch.allclose(model(good), model(skewed), atol=1e-4)
+
+
+@pytest.mark.parametrize(("threshold", "expected"), [(0.0, "confident"), (1.01, "uncertain")])
+def test_decision_follows_the_abstention_threshold(
+    predictor: Predictor,
+    sample_image_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    threshold: float,
+    expected: str,
+) -> None:
+    monkeypatch.setattr(predictor, "threshold", threshold)
+    with Image.open(sample_image_path) as im:
+        assert predictor.predict(im).decision == expected
+
+
+def test_confidence_equal_to_the_threshold_is_confident(
+    predictor: Predictor, sample_image_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    with Image.open(sample_image_path) as im:
+        confidence = predictor.predict(im).confidence
+        monkeypatch.setattr(predictor, "threshold", confidence)
+        assert predictor.predict(im).decision == "confident"
