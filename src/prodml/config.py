@@ -1,10 +1,12 @@
+import os
 from pathlib import Path
 
 import yaml
 from pydantic_settings import BaseSettings
 
 ROOT = Path(__file__).resolve().parents[2]
-params = yaml.safe_load((ROOT / "params.yaml").read_text())
+PARAMS_PATH = Path(os.environ.get("PRODML_PARAMS_PATH", ROOT / "params.yaml"))
+params = yaml.safe_load(PARAMS_PATH.read_text())
 
 
 class Settings(BaseSettings):
