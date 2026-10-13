@@ -2,7 +2,6 @@
 name = "prodml"
 version = "0.1.0"
 description = "Pet breed classification service (mlops-pet-breed)"
-readme = "README.md"
 requires-python = ">=3.12"
 
 dependencies = [
@@ -13,6 +12,7 @@ dependencies = [
     "pydantic>=2",
     "pydantic-settings>=2.15.0",
     "python-multipart>=0.0.9",
+    "pyyaml>=6.0.3",
     "torch>=2.1",
     "torchvision>=0.16",
     "uvicorn>=0.27",
