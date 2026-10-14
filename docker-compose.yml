@@ -1,0 +1,12 @@
+services:
+  api:
+    build: .
+    image: pet-breed
+    ports:
+      - "8000:8000"
+    environment:
+      LOG_LEVEL: INFO
+      MODEL-VERSION: "0.0.0"
+    volumes:
+      - ./models:/app/models:ro
+    restart: unless-stopped

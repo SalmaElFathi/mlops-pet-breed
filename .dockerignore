@@ -1,0 +1,16 @@
+.git
+.venv
+.dvc
+.github
+notebooks
+tests
+reports
+mlruns
+__pycache__
+*.ipynb
+.pytest_cache
+.coverage
+htmlcov
+models/*.onnx
+data/*
+!data/species_map.json

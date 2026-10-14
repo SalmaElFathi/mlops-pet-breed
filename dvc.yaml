@@ -1,0 +1,31 @@
+stages:
+  build_manifest:
+    cmd: python -m prodml.manifest
+    deps:
+      - src/prodml/manifest.py
+      - src/prodml/data.py
+      - src/prodml/schemas.py
+      - src/prodml/config.py
+      - data/raw
+    params:
+      - split.seed
+      - split.val_fraction
+    outs:
+      - data/manifest.json
+      - data/label_map.json:
+          cache: false
+      - data/species_map.json:
+          cache: false
+  corruptions:
+    cmd: python data/corruptions.py
+    deps:
+      - data/corruptions.py
+      - src/prodml/schemas.py
+      - src/prodml/config.py
+      - data/manifest.json
+      - data/raw
+    params:
+      - corruptions
+    outs:
+      - data/corrupted
+      - data/manifest_corrupted.json
