@@ -1,0 +1,14 @@
+FROM python:3.12-slim
+RUN useradd --create-home --uid 1000 appuser
+WORKDIR /app
+RUN pip install --no-cache-dir --index-url https://download.pytorch.org/whl/cpu torch torchvision
+COPY pyproject.toml  ./
+COPY src/ ./src/
+RUN pip install --no-cache-dir .
+COPY --chown=appuser:appuser params.yaml ./params.yaml
+COPY --chown=appuser:appuser data/species_map.json ./data/species_map.json
+COPY --chown=appuser:appuser models/model.pt ./models/model.pt
+ENV PRODML_PARAMS_PATH=/app/params.yaml
+USER appuser
+EXPOSE 8000
+CMD ["uvicorn", "prodml.api.main:app", "--host", "0.0.0.0", "--port", "8000"]
