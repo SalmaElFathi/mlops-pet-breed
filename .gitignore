@@ -224,3 +224,7 @@ models/
 .coverage
 htmlcov/
 .pytest_cache/
+note.txt
+mlruns/
+note.txt
+mlruns/

@@ -6,7 +6,75 @@ services:
       - "8000:8000"
     environment:
       LOG_LEVEL: INFO
-      MODEL-VERSION: "0.0.0"
     volumes:
       - ./models:/app/models:ro
     restart: unless-stopped
+
+  postgres:
+    image: postgres:16
+    profiles: ["mlops"]
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: mlflow
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d mlflow"]
+      interval: 5s
+      retries: 10
+
+  minio:
+    image: cgr.dev/chainguard/minio@sha256:2136d593beacf4461187035eca949fe49abd589d5079735025c711ca58fee0c8
+    profiles: ["mlops"]
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - miniodata:/data
+
+  create-bucket:
+    image: pet-mlflow
+    profiles: ["mlops"]
+    depends_on:
+      - minio
+    environment:
+      MLFLOW_S3_ENDPOINT_URL: http://minio:9000
+      AWS_ACCESS_KEY_ID: ${MINIO_ROOT_USER}
+      AWS_SECRET_ACCESS_KEY: ${MINIO_ROOT_PASSWORD}
+    volumes:
+      - ./scripts/create_bucket.py:/create_bucket.py:ro
+    command: python /create_bucket.py
+
+  mlflow:
+    build:
+      context: .
+      dockerfile: mlflow.Dockerfile
+      args:
+        MLFLOW_VERSION: ${MLFLOW_VERSION}
+    image: pet-mlflow
+    profiles: ["mlops"]
+    depends_on:
+      postgres:
+        condition: service_healthy
+      create-bucket:
+        condition: service_completed_successfully
+    environment:
+      MLFLOW_S3_ENDPOINT_URL: http://minio:9000
+      AWS_ACCESS_KEY_ID: ${MINIO_ROOT_USER}
+      AWS_SECRET_ACCESS_KEY: ${MINIO_ROOT_PASSWORD}
+    command: >
+      mlflow server --host 0.0.0.0 --port 5000
+      --backend-store-uri postgresql+psycopg2://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/mlflow
+      --artifacts-destination s3://mlflow
+      --serve-artifacts
+    ports:
+      - "5000:5000"
+
+volumes:
+  pgdata:
+  miniodata:
