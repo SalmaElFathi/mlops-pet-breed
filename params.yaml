@@ -21,3 +21,4 @@ train:
   seed: 42
   image_size: 224
   resize_size: 256
+  weight_decay: 0.0001
