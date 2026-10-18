@@ -10,8 +10,8 @@ stages:
       nfiles: 25866
     - path: src/prodml/config.py
       hash: md5
-      md5: 22d87caf44cae630da17fe84b0b642be
-      size: 955
+      md5: 7dca75a25e79e6b26d17684930c4a208
+      size: 1272
     - path: src/prodml/data.py
       hash: md5
       md5: ad6b5c21ec4a4be18bda1ae0155b020d
@@ -59,8 +59,8 @@ stages:
       nfiles: 25866
     - path: src/prodml/config.py
       hash: md5
-      md5: 22d87caf44cae630da17fe84b0b642be
-      size: 955
+      md5: 7dca75a25e79e6b26d17684930c4a208
+      size: 1272
     - path: src/prodml/schemas.py
       hash: md5
       md5: d6673496342440dcca7730f5b2ff40af
