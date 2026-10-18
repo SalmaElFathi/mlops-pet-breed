@@ -24,6 +24,10 @@ class Settings(BaseSettings):
     max_upload_bytes: int = 5 * 1024 * 1024
     abstention_threshold: float = params["calibration"]["abstention_threshold"]
     mlflow_tracking_uri: str = "http://localhost:5000"
+    use_registry: bool = False
+    model_name: str = "PetBreedClassifier"
+    model_alias: str = "production"
+    model_cache_dir: Path = Path("/tmp/prodml-model")
 
 
 settings = Settings()

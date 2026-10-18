@@ -47,4 +47,6 @@ Each backbone got the same random search: 10 nested trials, same seed (so the sa
 
 The ranking is the same before and after tuning (ResNet-50 > ResNet-18 > MobileNet). Both ResNets picked the same configuration. Tuning adds about one point of top-1, which is at the edge of what 736 validation images can resolve (standard error around 0.8 point), so the sweep did not find a clearly better setup than the defaults. In the ResNet-50 parallel-coordinates plot the best runs tend to be trained for 10 or 20 epochs and the worst for 5, but `lr`, `batch_size`, `weight_decay` and `epochs` all vary together, so the effect of the epoch count alone cannot be isolated. The tuned ResNet-50 has a slightly higher ECE than its base run (0.0223 vs 0.0185): accuracy went up, calibration did not.
 
-All figures are validation figures: the same 736 images
+All figures are validation figures. The same 736 images are used to fit the
+temperature, to select the best sweep trial and to report the metrics, so the
+numbers are slightly optimistic. The test split stays untouched until Session 4.

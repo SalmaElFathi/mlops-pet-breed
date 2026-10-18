@@ -6,6 +6,7 @@ requires-python = ">=3.12"
 
 dependencies = [
     "fastapi>=0.110",
+    "mlflow-skinny==3.17.1",
     "numpy>=1.26",
     "onnxruntime>=1.31.0",
     "pillow>=10",
@@ -33,7 +34,7 @@ dev = [
     "dvc>=3.67.1",
     "pre-commit>=4.6.2",
     "onnx>=1.23.2",
-    "mlflow>=3.17.1",
+    "mlflow==3.17.1",
 ]
 
 

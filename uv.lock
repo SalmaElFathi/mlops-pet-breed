@@ -2811,6 +2811,7 @@ version = "0.1.0"
 source = { editable = "." }
 dependencies = [
     { name = "fastapi" },
+    { name = "mlflow-skinny" },
     { name = "numpy" },
     { name = "onnxruntime" },
     { name = "pillow" },
@@ -2852,7 +2853,8 @@ requires-dist = [
     { name = "fastapi", specifier = ">=0.110" },
     { name = "httpx", marker = "extra == 'dev'", specifier = ">=0.27" },
     { name = "matplotlib", marker = "extra == 'train'", specifier = ">=3.8" },
-    { name = "mlflow", marker = "extra == 'dev'", specifier = ">=3.17.1" },
+    { name = "mlflow", marker = "extra == 'dev'", specifier = "==3.17.1" },
+    { name = "mlflow-skinny", specifier = "==3.17.1" },
     { name = "numpy", specifier = ">=1.26" },
     { name = "onnx", marker = "extra == 'dev'", specifier = ">=1.23.2" },
     { name = "onnxruntime", specifier = ">=1.31.0" },

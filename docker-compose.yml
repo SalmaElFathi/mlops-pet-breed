@@ -6,6 +6,8 @@ services:
       - "8000:8000"
     environment:
       LOG_LEVEL: INFO
+      USE_REGISTRY: ${USE_REGISTRY:-false}
+      MLFLOW_TRACKING_URI: http://mlflow:5000
     volumes:
       - ./models:/app/models:ro
     restart: unless-stopped
@@ -65,6 +67,7 @@ services:
         condition: service_completed_successfully
     environment:
       MLFLOW_S3_ENDPOINT_URL: http://minio:9000
+      MLFLOW_SERVER_ALLOWED_HOSTS: "mlflow:5000,localhost:*,127.0.0.1:*"
       AWS_ACCESS_KEY_ID: ${MINIO_ROOT_USER}
       AWS_SECRET_ACCESS_KEY: ${MINIO_ROOT_PASSWORD}
     command: >
