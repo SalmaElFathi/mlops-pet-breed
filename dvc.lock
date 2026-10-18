@@ -102,3 +102,69 @@ stages:
       hash: md5
       md5: 537525a2db5925cc751c2bfc6e2daa88
       size: 19183538
+  train:
+    cmd: python -m prodml.train --run-name dvc-repro --metrics-file
+      reports/metrics.json
+    deps:
+    - path: data/label_map.json
+      hash: md5
+      md5: ac7bc83a4edb7159e81579f8b4e4d630
+      size: 794
+    - path: data/manifest.json
+      hash: md5
+      md5: f9c6319a51d1c809d2eb1dafb293270f
+      size: 2094391
+    - path: data/raw
+      hash: md5
+      md5: 09f3f2eb7aef29750058cf9e40b59440.dir
+      size: 1632137285
+      nfiles: 25866
+    - path: src/prodml/config.py
+      hash: md5
+      md5: 7dca75a25e79e6b26d17684930c4a208
+      size: 1272
+    - path: src/prodml/dataset.py
+      hash: md5
+      md5: 9bfbcd45ab3cddf4cc4a0934519e0276
+      size: 1011
+    - path: src/prodml/metrics.py
+      hash: md5
+      md5: 92fb6ae978fe8ef5e5b55569687ae406
+      size: 2916
+    - path: src/prodml/model.py
+      hash: md5
+      md5: 65d301aa15b2a813de92e32bd010150b
+      size: 3279
+    - path: src/prodml/plots.py
+      hash: md5
+      md5: c3d8172a3b080348c88b3c9b6dcbde84
+      size: 1221
+    - path: src/prodml/train.py
+      hash: md5
+      md5: 8d0bacaa3e232a5e397a2a387d8c2417
+      size: 9665
+    - path: src/prodml/transforms.py
+      hash: md5
+      md5: 839ba8a56163c2a370e537f19ef3a80e
+      size: 986
+    params:
+      params.yaml:
+        calibration:
+          abstention_threshold: 0.7
+        split:
+          seed: 42
+          val_fraction: 0.2
+        train:
+          backbone: resnet50
+          lr: 0.00191
+          batch_size: 32
+          epochs: 10
+          seed: 42
+          image_size: 224
+          resize_size: 256
+          weight_decay: 0.001
+    outs:
+    - path: reports/metrics.json
+      hash: md5
+      md5: ceae936d9e357339d2bcbf505a3cc112
+      size: 173
