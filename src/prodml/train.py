@@ -122,6 +122,13 @@ def evaluate(logits: np.ndarray, labels: np.ndarray, threshold: float) -> dict[s
     }
 
 
+def write_metrics_file(scores: dict[str, float], path: Path) -> None:
+    """Write the metrics DVC tracks. Only the evaluation scores: timings change on every run."""
+    path.parent.mkdir(parents=True, exist_ok=True)
+    clean = {k: (None if np.isnan(v) else round(v, 6)) for k, v in scores.items()}
+    path.write_text(json.dumps(clean, indent=2) + "\n")
+
+
 def git_commit() -> str:
     try:
         return subprocess.check_output(["git", "rev-parse", "HEAD"], text=True).strip()
@@ -205,6 +212,8 @@ def run_experiment(cfg: dict[str, Any], run_name: str | None = None, nested: boo
             logits = head(val_x).numpy()
         labels = val_y.numpy()
         scores = evaluate(logits, labels, settings.abstention_threshold)
+        if cfg.get("metrics_file"):
+            write_metrics_file(scores, Path(cfg["metrics_file"]))
 
         set_head(clf.net, backbone, head)
         clf.temperature = scores["temperature"]
@@ -241,6 +250,7 @@ def main() -> None:
     parser.add_argument("--epochs", type=int, default=base["epochs"])
     parser.add_argument("--weight-decay", type=float, default=base.get("weight_decay", 1e-4))
     parser.add_argument("--run-name", default=None)
+    parser.add_argument("--metrics-file", default=None)
     args = parser.parse_args()
     cfg = {
         **base,
@@ -249,6 +259,7 @@ def main() -> None:
         "batch_size": args.batch_size,
         "epochs": args.epochs,
         "weight_decay": args.weight_decay,
+        "metrics_file": args.metrics_file,
     }
     run_experiment(cfg, run_name=args.run_name)
 
