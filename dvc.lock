@@ -158,7 +158,7 @@ stages:
           backbone: resnet50
           lr: 0.00191
           batch_size: 32
-          epochs: 5
+          epochs: 10
           seed: 42
           image_size: 224
           resize_size: 256
@@ -166,5 +166,5 @@ stages:
     outs:
     - path: reports/metrics.json
       hash: md5
-      md5: 06a8ea385a0ba417085a3bafd8783262
-      size: 170
+      md5: ceae936d9e357339d2bcbf505a3cc112
+      size: 173

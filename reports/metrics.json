@@ -1,9 +1,9 @@
 {
-  "top1": 0.940217,
-  "f1_macro": 0.940752,
-  "ece_before": 0.049094,
-  "ece": 0.008024,
-  "temperature": 0.7,
-  "coverage": 0.9375,
-  "selective_accuracy": 0.966667
+  "top1": 0.949728,
+  "f1_macro": 0.950133,
+  "ece_before": 0.023897,
+  "ece": 0.022287,
+  "temperature": 0.85,
+  "coverage": 0.936141,
+  "selective_accuracy": 0.970972
 }
