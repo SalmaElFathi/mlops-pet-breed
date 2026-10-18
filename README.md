@@ -1,5 +1,7 @@
 # mlops-pet-breed
 
+[![CI](https://github.com/SalmaElFathi/mlops-pet-breed/actions/workflows/ci.yml/badge.svg)](https://github.com/SalmaElFathi/mlops-pet-breed/actions/workflows/ci.yml)
+
 A FastAPI service that takes a pet photo and returns the predicted breed (37 cat and dog
 breeds, Oxford-IIIT Pet) with a confidence score. Low-confidence predictions are flagged as
 `uncertain` instead of being guessed. It runs in a non-root Docker container and writes
