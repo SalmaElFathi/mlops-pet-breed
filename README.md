@@ -70,6 +70,7 @@ pre-commit install
 ruff check src tests && black --check src tests   # lint
 pytest                                            # tests, 70% coverage gate
 ```
+The 4 data-validation tests (test_manifest.py) are skipped when data/manifest.json is not on disk. In CI the DVC remote is a MinIO on my laptop, unreachable from GitHub runners, so these tests run locally only.
 
 To run the API from source, `models/model.pt` is needed (it is not in Git). This creates an
 untrained demo checkpoint:
