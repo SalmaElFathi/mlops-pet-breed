@@ -1,0 +1,198 @@
+name: Continuous training
+
+on:
+  schedule:
+    - cron: "0 3 * * 1"
+  workflow_dispatch:
+    inputs:
+      data_rev:
+        description: "Git revision of the DVC pointers to train on (empty = current checkout)"
+        required: false
+        default: ""
+      margin:
+        description: "Top-1 margin: the candidate must beat Production by more than this (negative = accept slightly worse)"
+        required: false
+        default: "0.0"
+      request_production:
+        description: "Also ask for Production (waits for a human approval)"
+        type: boolean
+        default: false
+  repository_dispatch:
+    types: [drift-detected]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: continuous-training
+  cancel-in-progress: false
+
+env:
+  IMAGE: salma201/pet-breed
+
+jobs:
+  train:
+    runs-on: self-hosted
+    outputs:
+      promoted: ${{ steps.gate.outputs.promoted }}
+    env:
+      DATA_REV: ${{ inputs.data_rev }}
+      MARGIN: ${{ inputs.margin || '0.0' }}
+      RUN_NAME: ct-${{ github.run_number }}
+      MINIO_ACCESS_KEY: ${{ secrets.MINIO_ACCESS_KEY }}
+      MINIO_SECRET_KEY: ${{ secrets.MINIO_SECRET_KEY }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          clean: false
+
+      - name: Setup uv
+        uses: astral-sh/setup-uv@v6
+
+      - name: Install dependencies
+        run: |
+          uv python install 3.12
+          uv sync --locked --extra dev --extra train
+
+      - name: Select the data version
+        if: env.DATA_REV != ''
+        run: git checkout "$DATA_REV" -- dvc.lock data/raw.dvc
+
+      - name: Pull the data (dvc pull)
+        run: |
+          uv run dvc remote modify --local storage access_key_id "$MINIO_ACCESS_KEY"
+          uv run dvc remote modify --local storage secret_access_key "$MINIO_SECRET_KEY"
+          uv run dvc pull data/raw.dvc build_manifest
+
+      - name: Validate the data
+        run: uv run pytest tests/test_manifest.py -q --no-cov
+
+      - name: Train and evaluate
+        run: |
+          uv run python -m prodml.train --run-name "$RUN_NAME" --metrics-file reports/metrics.json
+          cat reports/metrics.json
+
+      - name: Gate against Production and promote to Staging
+        id: gate
+        run: |
+          uv run python - <<'PY'
+          import os
+
+          import mlflow
+
+          from prodml.config import settings
+          from prodml.registry import promote_if_better
+
+          mlflow.set_tracking_uri(settings.mlflow_tracking_uri)
+          name = os.environ["RUN_NAME"]
+          runs = mlflow.search_runs(
+              experiment_names=["pet-breed-classifier"],
+              filter_string=f"tags.mlflow.runName = '{name}'",
+              max_results=1,
+          )
+          run_id = runs.iloc[0]["run_id"]
+          promoted = promote_if_better(run_id, margin=float(os.environ["MARGIN"]))
+          print("PROMOTED to Staging" if promoted else "REJECTED: not better than Production")
+          with open(os.environ["GITHUB_OUTPUT"], "a") as out:
+              out.write(f"promoted={str(promoted).lower()}\n")
+          PY
+
+  build:
+    needs: train
+    if: needs.train.outputs.promoted == 'true'
+    runs-on: self-hosted
+    env:
+      DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+      DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          clean: false
+
+      - name: Setup uv
+        uses: astral-sh/setup-uv@v6
+
+      - name: Install dependencies
+        run: uv sync --locked --extra dev
+
+      - name: Download the Staging model
+        run: |
+          uv run python - <<'PY'
+          import shutil
+          from pathlib import Path
+
+          import mlflow
+          from mlflow import MlflowClient
+
+          from prodml.config import settings
+
+          mlflow.set_tracking_uri(settings.mlflow_tracking_uri)
+          version = MlflowClient().get_model_version_by_alias("PetBreedClassifier", "staging")
+          local = mlflow.artifacts.download_artifacts(
+              artifact_uri=version.source, dst_path="/tmp/staging-model"
+          )
+          Path("models").mkdir(exist_ok=True)
+          shutil.copy(local, "models/model.pt")
+          print("Staging model = version", version.version)
+          PY
+
+      - name: Build and push the image
+        run: |
+          echo "$DOCKERHUB_TOKEN" | docker login -u "$DOCKERHUB_USERNAME" --password-stdin
+          docker build -t "$IMAGE:ct-${{ github.run_number }}" .
+          docker push "$IMAGE:ct-${{ github.run_number }}"
+
+      - name: Docker logout
+        if: always()
+        run: docker logout
+
+  production:
+    needs: [train, build]
+    if: needs.train.outputs.promoted == 'true' && inputs.request_production == true
+    runs-on: self-hosted
+    environment: production
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          clean: false
+
+      - name: Setup uv
+        uses: astral-sh/setup-uv@v6
+
+      - name: Install dependencies
+        run: uv sync --locked --extra dev
+
+      - name: Move the alias production to the Staging version
+        run: |
+          uv run python - <<'PY'
+          import mlflow
+          from mlflow import MlflowClient
+
+          from prodml.config import settings
+
+          mlflow.set_tracking_uri(settings.mlflow_tracking_uri)
+          client = MlflowClient()
+          version = client.get_model_version_by_alias("PetBreedClassifier", "staging")
+          client.set_registered_model_alias("PetBreedClassifier", "production", version.version)
+          print("production -> version", version.version)
+          PY
+
+  notify:
+    needs: [train, build, production]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Write the run summary
+        run: |
+          {
+            echo "## Continuous training"
+            echo "- trigger: ${{ github.event_name }}"
+            echo "- train: ${{ needs.train.result }}"
+            echo "- promoted to Staging: ${{ needs.train.outputs.promoted }}"
+            echo "- image build: ${{ needs.build.result }}"
+            echo "- production approval: ${{ needs.production.result }}"
+          } >> "$GITHUB_STEP_SUMMARY"
