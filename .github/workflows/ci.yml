@@ -1,0 +1,115 @@
+name: Pet Breed Workflow
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+env:
+  IMAGE: salma201/pet-breed
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup uv
+        uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+
+      - name: Run pre-commit hooks
+        run: uvx pre-commit run --all-files
+
+  test:
+    needs: lint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup uv
+        uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+
+      - name: Setup Python
+        run: uv python install 3.12
+
+      - name: Install dependencies
+        run: uv sync --locked --extra dev --extra train
+
+      - name: Run tests with the coverage gate
+        run: uv run pytest --cov-fail-under=70 --cov-report=xml
+
+      - name: Upload the coverage report
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: coverage.xml
+
+      - name: Model quality gate (top-1 against the base branch)
+        if: github.event_name == 'pull_request'
+        run: uv run python -m prodml.gate --baseline-ref origin/${{ github.base_ref }}
+
+      - name: Create a demo checkpoint for the image build
+        run: |
+          uv run python - <<'PY'
+          import json
+          from pathlib import Path
+          from prodml.model import PetClassifier
+          lm = json.loads(Path("data/label_map.json").read_text())
+          PetClassifier("resnet18", sorted(lm, key=lm.get), pretrained=False).save(Path("models/model.pt"))
+          PY
+
+      - name: Upload the demo checkpoint
+        uses: actions/upload-artifact@v4
+        with:
+          name: demo-model
+          path: models/model.pt
+
+  build:
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Download the demo checkpoint
+        uses: actions/download-artifact@v4
+        with:
+          name: demo-model
+          path: models
+
+      - name: Setup Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Docker Hub
+        if: github.event_name == 'push'
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Short commit hash
+        id: sha
+        run: echo "short=${GITHUB_SHA::7}" >> "$GITHUB_OUTPUT"
+
+      - name: Build and push the image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: ${{ github.event_name == 'push' }}
+          tags: |
+            ${{ env.IMAGE }}:sha-${{ steps.sha.outputs.short }}
+            ${{ env.IMAGE }}:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max

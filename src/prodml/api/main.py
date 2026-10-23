@@ -16,7 +16,7 @@ from PIL import Image, UnidentifiedImageError
 from prodml.api.schemas import HealthResponse, PetBreedResponse
 from prodml.config import settings
 from prodml.logging_conf import correlation_id, setup_logging
-from prodml.model import PetClassifier
+from prodml.model_source import load_model
 from prodml.predict import Predictor
 
 logger = logging.getLogger(__name__)
@@ -25,11 +25,9 @@ logger = logging.getLogger(__name__)
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     setup_logging()
-    model = PetClassifier.load(settings.model_path)
+    model, model_version = load_model()
     species = json.loads(settings.species_map_path.read_text())
-    app.state.predictor = Predictor(
-        model, species, settings.abstention_threshold, settings.model_version
-    )
+    app.state.predictor = Predictor(model, species, settings.abstention_threshold, model_version)
     logger.info("model loaded: %d classes", len(model.class_names))
     yield
 

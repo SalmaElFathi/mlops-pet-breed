@@ -29,3 +29,23 @@ stages:
     outs:
       - data/corrupted
       - data/manifest_corrupted.json
+  train:
+    cmd: python -m prodml.train --run-name dvc-repro --metrics-file reports/metrics.json
+    deps:
+      - src/prodml/train.py
+      - src/prodml/model.py
+      - src/prodml/dataset.py
+      - src/prodml/metrics.py
+      - src/prodml/transforms.py
+      - src/prodml/plots.py
+      - src/prodml/config.py
+      - data/manifest.json
+      - data/label_map.json
+      - data/raw
+    params:
+      - train
+      - split
+      - calibration
+    metrics:
+      - reports/metrics.json:
+          cache: false

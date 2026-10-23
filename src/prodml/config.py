@@ -2,7 +2,7 @@ import os
 from pathlib import Path
 
 import yaml
-from pydantic_settings import BaseSettings
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 ROOT = Path(__file__).resolve().parents[2]
 PARAMS_PATH = Path(os.environ.get("PRODML_PARAMS_PATH", ROOT / "params.yaml"))
@@ -10,6 +10,7 @@ params = yaml.safe_load(PARAMS_PATH.read_text())
 
 
 class Settings(BaseSettings):
+    model_config = SettingsConfigDict(env_file=ROOT / ".env", extra="ignore")
     data_path: Path = Path("data/raw")
     test_size: float = params["split"]["val_fraction"]
     random_state: int = params["split"]["seed"]
@@ -22,6 +23,11 @@ class Settings(BaseSettings):
     model_version: str = "0.0.0"
     max_upload_bytes: int = 5 * 1024 * 1024
     abstention_threshold: float = params["calibration"]["abstention_threshold"]
+    mlflow_tracking_uri: str = "http://localhost:5000"
+    use_registry: bool = False
+    model_name: str = "PetBreedClassifier"
+    model_alias: str = "production"
+    model_cache_dir: Path = Path("/tmp/prodml-model")
 
 
 settings = Settings()

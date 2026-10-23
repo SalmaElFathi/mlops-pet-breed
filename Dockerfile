@@ -1,5 +1,6 @@
 FROM python:3.12-slim AS builder
 WORKDIR /build
+ENV PIP_DEFAULT_TIMEOUT=300 PIP_RETRIES=10
 RUN python -m venv /opt/venv
 ENV PATH="/opt/venv/bin:$PATH"
 RUN pip install --no-cache-dir --index-url https://download.pytorch.org/whl/cpu torch torchvision
@@ -18,6 +19,6 @@ COPY --chown=appuser:appuser models/model.pt ./models/model.pt
 ENV PRODML_PARAMS_PATH=/app/params.yaml
 USER appuser
 EXPOSE 8000
-HEALTHCHECK --interval=30s --timeout=3s --retries=3 \
+HEALTHCHECK --interval=30s --timeout=3s --start-period=90s --retries=3 \
   CMD python -c "import urllib.request;urllib.request.urlopen('http://localhost:8000/health')"
 CMD ["uvicorn", "prodml.api.main:app", "--host", "0.0.0.0", "--port", "8000"]

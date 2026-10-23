@@ -1,0 +1,6 @@
+outs:
+- md5: 01b2cb44790abfc2b6121605e365c2bb.dir
+  size: 1127821
+  nfiles: 10
+  hash: md5
+  path: probe

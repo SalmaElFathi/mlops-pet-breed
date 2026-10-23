@@ -1,3 +1,5 @@
+ .terraform/
+*.tfstate*
 data/raw/oxford-iiit-pet
 data/manifest.json
 data/corrupted/
@@ -224,3 +226,22 @@ models/
 .coverage
 htmlcov/
 .pytest_cache/
+note.txt
+mlruns/
+note.txt
+mlruns/
+.cache/
+
+# Terraform
+*.tfstate*
+.terraform/
+*.tfvars
+tfplan
+crash.log
+
+# Terraform
+*.tfstate*
+.terraform/
+*.tfvars
+tfplan
+crash.log
